@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/unixpickle/fbmsgr"
@@ -22,7 +23,24 @@ func (n *Notifier) Notify(puppy *Puppy) error {
 	if err != nil {
 		return err
 	}
-	_, err = session.SendText(n.Recipient, n.PuppyMessage(puppy))
+	if _, err := session.SendText(n.Recipient, n.PuppyMessage(puppy)); err != nil {
+		return err
+	}
+
+	if puppy.PhotoURL == "" {
+		return nil
+	}
+
+	resp, err := http.Get(puppy.PhotoURL)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	attachment, err := session.Upload("puppy.jpg", resp.Body)
+	if err != nil {
+		return err
+	}
+	_, err = session.SendAttachment(n.Recipient, attachment)
 	return err
 }
 
