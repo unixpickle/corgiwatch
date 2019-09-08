@@ -19,7 +19,7 @@ type Notifier struct {
 }
 
 func (n *Notifier) Notify(puppy *Puppy) error {
-	session, err := n.getSession()
+	session, err := n.GetSession()
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (n *Notifier) PuppyMessage(puppy *Puppy) string {
 		"See more at " + puppy.ListingURL
 }
 
-func (n *Notifier) getSession() (*fbmsgr.Session, error) {
+func (n *Notifier) GetSession() (*fbmsgr.Session, error) {
 	if n.session != nil && time.Now().Before(n.expiration) {
 		return n.session, nil
 	}

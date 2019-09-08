@@ -47,6 +47,9 @@ func main() {
 		Pass:      messengerPass,
 		Recipient: messengerRecipient,
 	}
+	if _, err := notifier.GetSession(); err != nil {
+		essentials.Die(err)
+	}
 
 	log.Println("Starting feed loop...")
 	for {
