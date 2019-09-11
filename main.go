@@ -18,6 +18,7 @@ func main() {
 	var messengerUser string
 	var messengerPass string
 	var messengerRecipient string
+	var registrationFilter string
 
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr, "Required flags: -user, -pass, -recipient")
@@ -30,6 +31,7 @@ func main() {
 	flag.StringVar(&messengerUser, "user", "", "Facebook messenger username")
 	flag.StringVar(&messengerPass, "pass", "", "Facebook messenger password")
 	flag.StringVar(&messengerRecipient, "recipient", "", "Facebook messenger recipient ID")
+	flag.StringVar(&registrationFilter, "registration", "", "acceptable value for registration")
 
 	flag.Parse()
 
@@ -42,6 +44,7 @@ func main() {
 	feed, err := NewFeed(puppyURL, savePath)
 	essentials.Must(err)
 
+	log.Println("Creating notifier...")
 	notifier := &Notifier{
 		User:      messengerUser,
 		Pass:      messengerPass,
@@ -58,6 +61,10 @@ func main() {
 			log.Println("Pull error:", err)
 		} else {
 			for _, p := range puppies {
+				if registrationFilter != "" && p.Registration != registrationFilter {
+					log.Println("Skipping", p.Registration, "registered puppy.")
+					continue
+				}
 				log.Println(notifier.PuppyMessage(p))
 				if err := notifier.Notify(p); err != nil {
 					log.Println("Send error:", err)
