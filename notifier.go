@@ -60,6 +60,7 @@ func (n *Notifier) PuppyMessage(puppy *Puppy) string {
 	return "New Puppy! " + possessive + " name is " + puppy.Name + ". " +
 		pronoun + " is " + puppy.Registration + " registered. " +
 		pronoun + " costs " + puppy.Price + ". " +
+		pronoun + " is " + puppy.Age + " and is available on " + puppy.AvailableDate + ". " +
 		"See more at " + puppy.ListingURL
 }
 

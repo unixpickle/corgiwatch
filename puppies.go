@@ -19,6 +19,10 @@ type Puppy struct {
 	Registration string
 	ListingURL   string
 	PhotoURL     string
+
+	// Fields on the puppy details page.
+	AvailableDate string
+	Age           string
 }
 
 func FetchPuppies(puppyURL string) ([]*Puppy, error) {
@@ -83,4 +87,38 @@ func ParsePuppy(row *html.Node, u *url.URL) *Puppy {
 	res.Price = getField("asking-price")
 	res.Registration = getField("registration")
 	return res
+}
+
+func (p *Puppy) FetchDetails() error {
+	resp, err := http.Get(p.ListingURL)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	parsed, err := html.Parse(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	availableDate, ok := scrape.Find(parsed, scrape.ByClass("field-name-field-date-available"))
+	if !ok {
+		return errors.New("could not find availability date")
+	}
+	p.AvailableDate = FieldItemValue(availableDate)
+
+	age, ok := scrape.Find(parsed, scrape.ByClass("age-in-weeks"))
+	if !ok {
+		return errors.New("could not find age in weeks")
+	}
+	p.Age = strings.TrimSpace(scrape.Text(age))
+
+	return nil
+}
+
+func FieldItemValue(item *html.Node) string {
+	items, ok := scrape.Find(item, scrape.ByClass("field-items"))
+	if !ok {
+		return ""
+	}
+	return strings.TrimSpace(scrape.Text(items))
 }

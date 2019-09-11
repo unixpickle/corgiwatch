@@ -46,6 +46,9 @@ func (f *Feed) Pull() ([]*Puppy, error) {
 			}
 		}
 		if !found {
+			if err := p.FetchDetails(); err != nil {
+				return nil, err
+			}
 			newPuppies = append(newPuppies, p)
 		}
 	}
